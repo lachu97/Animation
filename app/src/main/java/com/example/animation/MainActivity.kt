@@ -8,18 +8,20 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,8 +40,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    val networkstate = ConnectionLiveData(this).observeAsState()
-                    var ok by remember {
+                    val networkstate = ConnectionLiveData(this@MainActivity).observeAsState()
+                    val networkstate1 = ConnectionLiveData(this@MainActivity)
+                    val netstate = produceState(initialValue = false, producer = {
+                        value = ConnectionLiveData(this@MainActivity).value ?: false
+                    })
+
+                    val ok by remember {
+                        mutableStateOf(false)
+                    }
+                    var ok2 by remember {
                         mutableStateOf(false)
                     }
                     var shown by remember {
@@ -76,10 +86,10 @@ class MainActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .background(Color(0xFFEDEAE0))
-                            .padding(16.dp)
+                            .padding(1.dp)
                             .fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ){
+                    ) {
                         Button(
                             onClick = {
                                 isShortText.value = !isShortText.value
@@ -92,7 +102,6 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .background(Color(0xFFFF9966))
                                 .padding(16.dp)
-                                .fillMaxWidth()
                                 .animateContentSize()
                         ) {
                             Text(
@@ -129,20 +138,22 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .padding(5.dp), verticalAlignment = Alignment.CenterVertically
                         ) {
-                            var count by remember { mutableStateOf(0) }
-                            Button(onClick = { count++ }) {
+                            Button(onClick = { }) {
                                 Text("Add")
                             }
 
                         }
-                        Box(modifier = Modifier
-                            .size(100.dp)
-                            .background(color.value))
+                        Box(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .background(color.value)
+                        )
                         Button(onClick = { shown = !shown }) {
-                            Text(text = "Click Me to see ${shown}")
+                            Text(text = "Click Me to see ${netstate.value}")
                         }
+
                         AnimatedVisibility(
-                            visible = networkstate.value ?: false,
+                            visible = netstate.value ?: false,
                             enter = fadeIn(
                                 // customize with tween AnimationSpec
                                 animationSpec = tween(
@@ -168,6 +179,76 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
+
+
+                    }
+
+                    val count = remember { mutableStateOf(0) }
+                    val animcount = animateIntAsState(
+                        count.value,
+                        animationSpec = tween(
+                            durationMillis = 800,
+                            delayMillis = 200,
+                            easing = LinearOutSlowInEasing
+                        )
+                    )
+                    Button(onClick = { count.value = count.value + 1 }) {
+                        Text("Add Item")
+                    }
+                    Box(
+                        modifier = Modifier.padding(4.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic__cart),
+                            contentDescription = null,
+                            modifier = Modifier.size(54.dp)
+                        )
+                        if (count.value > 0) {
+                            ok2 = true
+                            AnimatedVisibility(
+                                visible = ok2,
+                                enter = fadeIn(
+                                    // customize with tween AnimationSpec
+                                    animationSpec = tween(
+                                        durationMillis = 1000,
+                                        delayMillis = 250,
+                                        easing = LinearOutSlowInEasing
+                                    )
+                                ),
+                                modifier = Modifier.clip(CircleShape)
+
+                            ) {
+                                Text(
+                                    text = "${animcount.value}",
+                                    modifier = Modifier
+                                        .background(Color.Red)
+                                        .size(24.dp)
+                                        .padding(5.dp)
+                                        .align(Alignment.TopEnd),
+                                    textAlign = TextAlign.Center,
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontStyle = FontStyle.Normal,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+//                            Text(
+//                                text = "${animcount.value}",
+//                                modifier = Modifier
+//                                    .background(Color.Red)
+//                                    .size(24.dp)
+//                                    .padding(5.dp)
+//                                    .align(Alignment.TopEnd)
+//                                    .clip(RoundedCornerShape(20.dp)),
+//                                textAlign = TextAlign.Center,
+//                                color = Color.White,
+//                                fontSize = 12.sp,
+//                                fontStyle = FontStyle.Normal,
+//                                fontWeight = FontWeight.Bold
+//                            )
+
+                        }
+
 
                     }
 
