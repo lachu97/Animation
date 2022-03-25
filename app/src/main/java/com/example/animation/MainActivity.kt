@@ -224,7 +224,7 @@ class MainActivity : ComponentActivity() {
                                         .background(Color.Red)
                                         .size(24.dp)
                                         .padding(5.dp)
-                                        .align(Alignment.TopEnd),
+                                        .align(Alignment.Center),
                                     textAlign = TextAlign.Center,
                                     color = Color.White,
                                     fontSize = 12.sp,
